@@ -1,14 +1,10 @@
 import { Types, type HydratedDocument } from "mongoose";
 
-export interface ITranslation {
-  englishText: string;
-}
-
 export interface IWord {
   _id: Types.ObjectId;
   germanWord: string;
   isBookmarked: boolean;
-  translations: ITranslation[];
+  translations: string[];
 }
 
 export interface IVocabularyFile {
@@ -22,8 +18,12 @@ export interface IVocabularyFile {
 
 export interface IWordInput {
   germanWord: string;
-  translations?: ITranslation[];
+  translations: string[];
 }
+
+export type IWordUpdateInput = Partial<
+  Pick<IWord, "germanWord" | "isBookmarked">
+>;
 
 export interface ICreateVocabularyFileInput {
   name: string;

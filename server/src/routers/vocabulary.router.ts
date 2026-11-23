@@ -5,6 +5,7 @@ import {
   updateVocabularyFileValidators,
 } from "../validators/vocabulary.validator.js";
 import validate from "../middlewares/validate.js";
+import wordRouter from "./word.router.js";
 
 const router = express.Router();
 
@@ -16,6 +17,7 @@ router
     validate,
     vocabularyController.createVocabularyFile,
   );
+
 router
   .route("/:fileId")
   .get(vocabularyController.getVocabularyFileById)
@@ -25,5 +27,7 @@ router
     vocabularyController.updateVocabularyFile,
   )
   .delete(vocabularyController.deleteVocabularyFile);
+
+router.use("/:fileId/words", wordRouter);
 
 export default router;
