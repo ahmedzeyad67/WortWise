@@ -21,6 +21,16 @@ export interface IWordInput {
   translations: string[];
 }
 
+export interface IBookmarkedWord extends IWord {
+  vocabularyFileId: Types.ObjectId;
+  vocabularyFileName: string;
+}
+
+export interface IBookmarkedFile {
+  name: string;
+  words: IBookmarkedWord[];
+}
+
 export type IWordUpdateInput = Partial<
   Pick<IWord, "germanWord" | "isBookmarked">
 >;

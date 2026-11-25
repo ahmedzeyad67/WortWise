@@ -6,11 +6,9 @@ import type {
   IWordInput,
   IWordUpdateInput,
 } from "../types/vocabulary.types.js";
-import getUniqueTranslations from "../utils/translation.utils.js";
-
-const normalizeTextForComparison = (text: string): string => {
-  return text.normalize("NFC").trim().toLowerCase();
-};
+import getWordFromVocabularyFile from "../utils/get-word-from-vocabulary-file.js";
+import getUniqueTranslations from "../utils/get-unique-translations.js";
+import normalizeTextForComparison from "../utils/normalize-for-comparison.js";
 
 const addWordToVocabularyFile = async (
   fileId: string,
@@ -59,19 +57,10 @@ const updateWordInVocabularyFile = async (
     throw new AppError("At least one word field must be provided", 400);
   }
 
-  const vocabularyFile = await vocabularyModel.findById(fileId);
-
-  if (!vocabularyFile) {
-    throw new AppError("Vocabulary file not found", 404);
-  }
-
-  const word = vocabularyFile.words.find(
-    (existingWord) => existingWord._id.toString() === wordId,
+  const { vocabularyFile, word } = await getWordFromVocabularyFile(
+    fileId,
+    wordId,
   );
-
-  if (!word) {
-    throw new AppError("Word not found", 404);
-  }
 
   if (updates.germanWord !== undefined) {
     const germanWord = updates.germanWord.trim();
@@ -111,19 +100,14 @@ const removeWordFromVocabularyFile = async (
   fileId: string,
   wordId: string,
 ): Promise<void> => {
-  const vocabularyFile = await vocabularyModel.findById(fileId);
-
-  if (!vocabularyFile) {
-    throw new AppError("Vocabulary file not found", 404);
-  }
-
-  const wordIndex = vocabularyFile.words.findIndex(
-    (word) => word._id.toString() === wordId,
+  const { vocabularyFile, word } = await getWordFromVocabularyFile(
+    fileId,
+    wordId,
   );
 
-  if (wordIndex === -1) {
-    throw new AppError("Word not found", 404);
-  }
+  const wordIndex = vocabularyFile.words.findIndex(
+    (existingWord) => existingWord._id.toString() === word._id.toString(),
+  );
 
   vocabularyFile.words.splice(wordIndex, 1);
   await vocabularyFile.save();

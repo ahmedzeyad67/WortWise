@@ -2,6 +2,8 @@ import vocabularyModel from "../models/vocabulary.model.js";
 import AppError from "../utils/app-error.js";
 import type {
   ICreateVocabularyFileInput,
+  IBookmarkedFile,
+  IBookmarkedWord,
   IVocabularyFile,
 } from "../types/vocabulary.types.js";
 
@@ -9,6 +11,27 @@ const getAllVocabularyFiles = async (): Promise<IVocabularyFile[]> => {
   const vocabularyFiles = await vocabularyModel.find();
 
   return vocabularyFiles;
+};
+
+const getBookmarkedFile = async (): Promise<IBookmarkedFile> => {
+  const vocabularyFiles = await vocabularyModel.find({
+    "words.isBookmarked": true,
+  });
+
+  const words: IBookmarkedWord[] = vocabularyFiles.flatMap((file) =>
+    file.words
+      .filter((word) => word.isBookmarked)
+      .map((word) => ({
+        _id: word._id,
+        germanWord: word.germanWord,
+        isBookmarked: word.isBookmarked,
+        translations: word.translations,
+        vocabularyFileId: file._id,
+        vocabularyFileName: file.name,
+      })),
+  );
+
+  return { name: "Bookmarked", words };
 };
 
 const getVocabularyFileById = async (
@@ -23,9 +46,10 @@ const getVocabularyFileById = async (
   return vocabularyFile;
 };
 
-const createVocabularyFile = async (
-  { name, words = [] }: ICreateVocabularyFileInput,
-): Promise<IVocabularyFile> => {
+const createVocabularyFile = async ({
+  name,
+  words = [],
+}: ICreateVocabularyFileInput): Promise<IVocabularyFile> => {
   const newVocabularyFile = new vocabularyModel({ name, words });
 
   await newVocabularyFile.save();
@@ -60,6 +84,7 @@ const deleteVocabularyFile = async (fileId: string) => {
 
 export default {
   getAllVocabularyFiles,
+  getBookmarkedFile,
   getVocabularyFileById,
   createVocabularyFile,
   updateVocabularyFile,

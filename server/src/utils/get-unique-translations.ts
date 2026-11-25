@@ -1,14 +1,10 @@
-const normalizeTextForComparison = (text: string): string => {
-  return text.normalize("NFC").trim().toLowerCase();
-};
+import normalizeTextForComparison from "./normalize-for-comparison.js";
 
 const getUniqueTranslations = (
   existingTranslations: string[],
   newTranslations: string[],
 ): string[] => {
-  const seen = new Set(
-    existingTranslations.map(normalizeTextForComparison),
-  );
+  const seen = new Set(existingTranslations.map(normalizeTextForComparison));
   const uniqueTranslations: string[] = [];
 
   newTranslations.forEach((translation) => {

@@ -14,6 +14,15 @@ const getAllVocabularyFiles = asyncWrapper(async (_req, res) => {
   });
 });
 
+const getBookmarkedFile = asyncWrapper(async (_req, res) => {
+  const data = await vocabularyService.getBookmarkedFile();
+
+  res.json({
+    status: "success",
+    data,
+  });
+});
+
 const getVocabularyFileById = asyncWrapper(async (req, res) => {
   const data = await vocabularyService.getVocabularyFileById(
     req.params.fileId as string,
@@ -56,6 +65,7 @@ const deleteVocabularyFile = asyncWrapper(async (req, res) => {
 
 export default {
   getAllVocabularyFiles,
+  getBookmarkedFile,
   getVocabularyFileById,
   createVocabularyFile,
   updateVocabularyFile,

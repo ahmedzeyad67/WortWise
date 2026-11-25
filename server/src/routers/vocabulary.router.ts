@@ -18,6 +18,8 @@ router
     vocabularyController.createVocabularyFile,
   );
 
+router.get("/bookmarked", vocabularyController.getBookmarkedFile);
+
 router
   .route("/:fileId")
   .get(vocabularyController.getVocabularyFileById)

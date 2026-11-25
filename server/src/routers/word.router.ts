@@ -6,6 +6,7 @@ import {
   wordUpdateValidators,
   wordValidators,
 } from "../validators/word.validator.js";
+import translationRouter from "./translation.router.js";
 
 const router = express.Router({ mergeParams: true });
 
@@ -29,5 +30,12 @@ router
     validate,
     wordController.removeWordFromVocabularyFile,
   );
+
+router.use(
+  "/:wordId/translations",
+  wordIdValidator,
+  validate,
+  translationRouter,
+);
 
 export default router;

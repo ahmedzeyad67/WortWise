@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import type { IVocabularyFile } from "../types/vocabulary.types.js";
+import normalizeTextForComparison from "../utils/normalize-for-comparison.js";
 
 const wordSchema = new Schema({
   germanWord: { type: String, required: true, trim: true },
@@ -23,6 +24,11 @@ const vocabularyFileSchema = new Schema(
       minlength: 3,
       maxlength: 25,
       trim: true,
+      validate: {
+        validator: (name: string) =>
+          normalizeTextForComparison(name) !== "bookmarked",
+        message: '"Bookmarked" is a reserved vocabulary file name',
+      },
     },
     words: { type: [wordSchema], default: [] },
     isPinned: { type: Boolean, default: false },
@@ -37,6 +43,8 @@ vocabularyFileSchema.index(
     collation: { locale: "en", strength: 2 },
   },
 );
+
+vocabularyFileSchema.index({ "words.isBookmarked": 1 });
 
 const VocabularyFile = mongoose.model<IVocabularyFile>(
   "VocabularyFile",

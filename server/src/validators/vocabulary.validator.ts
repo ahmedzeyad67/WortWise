@@ -1,5 +1,14 @@
 import { body } from "express-validator";
 import { wordValidators } from "./word.validator.js";
+import normalizeTextForComparison from "../utils/normalize-for-comparison.js";
+
+const validateFileNameIsNotReserved = (name: string) => {
+  if (normalizeTextForComparison(name) === "bookmarked") {
+    throw new Error('"Bookmarked" is a reserved vocabulary file name');
+  }
+
+  return true;
+};
 
 export const createVocabularyFileValidators = [
   body().custom((value) => {
@@ -20,8 +29,11 @@ export const createVocabularyFileValidators = [
     .trim()
     .notEmpty()
     .withMessage("Name is required")
+    .bail()
     .isLength({ min: 3, max: 25 })
-    .withMessage("Name must be between 3 and 25 characters"),
+    .withMessage("Name must be between 3 and 25 characters")
+    .bail()
+    .custom(validateFileNameIsNotReserved),
   body("words").optional().isArray().withMessage("Words must be an array"),
   ...wordValidators("words.*"),
 ];
@@ -51,8 +63,11 @@ export const updateVocabularyFileValidators = [
     .trim()
     .notEmpty()
     .withMessage("Name cannot be empty")
+    .bail()
     .isLength({ min: 3, max: 25 })
-    .withMessage("Name must be between 3 and 25 characters"),
+    .withMessage("Name must be between 3 and 25 characters")
+    .bail()
+    .custom(validateFileNameIsNotReserved),
   body("isPinned")
     .optional()
     .isBoolean({ strict: true })
