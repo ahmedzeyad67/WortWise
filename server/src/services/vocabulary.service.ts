@@ -8,7 +8,9 @@ import type {
 } from "../types/vocabulary.types.js";
 
 const getAllVocabularyFiles = async (): Promise<IVocabularyFile[]> => {
-  const vocabularyFiles = await vocabularyModel.find();
+  const vocabularyFiles = await vocabularyModel
+    .find()
+    .sort({ isPinned: -1, updatedAt: -1 });
 
   return vocabularyFiles;
 };
