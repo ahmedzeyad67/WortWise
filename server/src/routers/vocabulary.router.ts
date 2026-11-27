@@ -6,6 +6,8 @@ import {
 } from "../validators/vocabulary.validator.js";
 import validate from "../middlewares/validate.js";
 import wordRouter from "./word.router.js";
+import uploadFile from "../middlewares/upload.js";
+import { vocabularyImportValidators } from "../validators/vocabulary-import.validator.js";
 
 const router = express.Router();
 
@@ -29,6 +31,19 @@ router
     vocabularyController.updateVocabularyFile,
   )
   .delete(vocabularyController.deleteVocabularyFile);
+
+router.post(
+  "/import/preview",
+  uploadFile,
+  vocabularyController.previewVocabularyImport,
+);
+
+router.post(
+  "/import",
+  vocabularyImportValidators,
+  validate,
+  vocabularyController.importReviewedWords,
+);
 
 router.use("/:fileId/words", wordRouter);
 

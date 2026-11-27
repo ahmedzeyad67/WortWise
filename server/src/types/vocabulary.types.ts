@@ -40,4 +40,19 @@ export interface ICreateVocabularyFileInput {
   words?: IWordInput[];
 }
 
+export type IVocabularyImportDestination =
+  | { type: "existing"; fileId: string }
+  | { type: "new"; name: string };
+
+export interface IVocabularyImportInput {
+  destination: IVocabularyImportDestination;
+  words: IWordInput[];
+}
+
+export interface IVocabularyImportResult {
+  vocabularyFile: IVocabularyFile;
+  addedWords: number;
+  updatedWords: number;
+}
+
 export type IVocabularyFileDocument = HydratedDocument<IVocabularyFile>;

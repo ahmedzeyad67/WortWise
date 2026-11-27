@@ -27,11 +27,9 @@ const addWordToVocabularyFile = async (
   );
 
   if (existingWord) {
-    existingWord.translations.push(
-      ...getUniqueTranslations(
-        existingWord.translations,
-        wordInput.translations,
-      ),
+    existingWord.translations = getUniqueTranslations(
+      existingWord.translations,
+      wordInput.translations,
     );
   } else {
     existingWord = {

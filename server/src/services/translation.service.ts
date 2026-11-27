@@ -2,7 +2,6 @@ import type { IWord } from "../types/vocabulary.types.js";
 import AppError from "../utils/app-error.js";
 import getWordFromVocabularyFile from "../utils/get-word-from-vocabulary-file.js";
 import getUniqueTranslations from "../utils/get-unique-translations.js";
-import normalizeTextForComparison from "../utils/normalize-for-comparison.js";
 
 const addTranslationToWord = async (
   fileId: string,
@@ -14,13 +13,15 @@ const addTranslationToWord = async (
     wordId,
   );
 
-  const uniqueTranslations = getUniqueTranslations(word.translations, [
+  const updatedTranslations = getUniqueTranslations(word.translations, [
     newTranslation,
   ]);
 
-  word.translations.push(...uniqueTranslations);
+  const hasChanged =
+    JSON.stringify(updatedTranslations) !== JSON.stringify(word.translations);
 
-  if (uniqueTranslations.length > 0) {
+  if (hasChanged) {
+    word.translations = updatedTranslations;
     await vocabularyFile.save();
   }
 
@@ -46,26 +47,10 @@ const editTranslationInWord = async (
     throw new AppError("Translation not found", 404);
   }
 
-  const currentTranslation = word.translations[translationIndex]!;
-  if (
-    normalizeTextForComparison(currentTranslation) ===
-    normalizeTextForComparison(newTranslation)
-  ) {
-    return word;
-  }
-
-  const existingTranslations = word.translations.filter(
-    (_translation, index) => index !== translationIndex,
-  );
-  const uniqueTranslations = getUniqueTranslations(existingTranslations, [
-    newTranslation,
-  ]);
-
-  if (uniqueTranslations.length === 0) {
-    word.translations.splice(translationIndex, 1);
-  } else {
-    word.translations[translationIndex] = uniqueTranslations[0]!;
-  }
+  const translationsToEdit = [...word.translations];
+  translationsToEdit[translationIndex] = newTranslation;
+  const updatedTranslations = getUniqueTranslations([], translationsToEdit);
+  word.translations = updatedTranslations;
 
   await vocabularyFile.save();
 
