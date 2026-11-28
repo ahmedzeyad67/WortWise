@@ -11,7 +11,7 @@ import type {
 } from "../types/vocabulary.types.js";
 import { getTranslationsBatch } from "./translation-provider.service.js";
 
-const MAX_IMPORT_LINES = 500;
+const MAX_IMPORT_LINES = 650;
 const MAX_TEXTS_PER_DEEPL_REQUEST = 50;
 
 export interface IVocabularyImportPreviewWord {
