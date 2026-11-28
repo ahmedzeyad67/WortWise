@@ -9,10 +9,10 @@ import type {
   IVocabularyImportInput,
   IVocabularyImportResult,
 } from "../types/vocabulary.types.js";
-import getTranslations from "./translation-provider.service.js";
+import { getTranslationsBatch } from "./translation-provider.service.js";
 
 const MAX_IMPORT_LINES = 500;
-const MAX_CONCURRENT_TRANSLATIONS = 15;
+const MAX_TEXTS_PER_DEEPL_REQUEST = 50;
 
 export interface IVocabularyImportPreviewWord {
   germanWord: string;
@@ -58,19 +58,18 @@ const getVocabularyImportPreview = async (
   });
 
   const batches = Array.from(
-    { length: Math.ceil(germanWords.length / MAX_CONCURRENT_TRANSLATIONS) },
+    { length: Math.ceil(germanWords.length / MAX_TEXTS_PER_DEEPL_REQUEST) },
     (_, index) =>
       germanWords.slice(
-        index * MAX_CONCURRENT_TRANSLATIONS,
-        (index + 1) * MAX_CONCURRENT_TRANSLATIONS,
+        index * MAX_TEXTS_PER_DEEPL_REQUEST,
+        (index + 1) * MAX_TEXTS_PER_DEEPL_REQUEST,
       ),
   );
   const words = await batches.reduce<Promise<IVocabularyImportPreviewWord[]>>(
     async (translatedWordsPromise, batch) => {
       const translatedWords = await translatedWordsPromise;
-      const translatedBatch = await Promise.all(
-      batch.map(async (germanWord) => {
-        const translations = await getTranslations(germanWord);
+      const batchTranslations = await getTranslationsBatch(batch);
+      const translatedBatch = batch.map((germanWord, index) => {
         completed += 1;
         onProgress?.({
           phase: "translating",
@@ -78,9 +77,8 @@ const getVocabularyImportPreview = async (
           total: germanWords.length,
         });
 
-        return { germanWord, translations };
-      }),
-      );
+        return { germanWord, translations: batchTranslations[index] ?? [] };
+      });
 
       return [...translatedWords, ...translatedBatch];
     },
@@ -91,7 +89,7 @@ const getVocabularyImportPreview = async (
 
   if (words.every((word) => word.translations.length === 0)) {
     throw new AppError(
-      "Translation providers could not translate the extracted entries",
+      "DeepL could not translate the extracted entries",
       502,
     );
   }
